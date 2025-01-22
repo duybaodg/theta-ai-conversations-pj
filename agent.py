@@ -41,6 +41,9 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
             "You were created as a demo to showcase the capabilities of LiveKit's agents framework."
         ),
         modalities=["audio", "text"],
+        turn_detection=openai.realtime.ServerVadOptions(
+            threshold=0.95, prefix_padding_ms=200, silence_duration_ms=500
+        ),
     )
     agent = MultimodalAgent(model=model)
     agent.start(ctx.room, participant)
