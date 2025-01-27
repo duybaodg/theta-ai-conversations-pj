@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import logging
+import os
+from livekit import api
+from flask import Flask
 from dotenv import load_dotenv
 
 from livekit import rtc
@@ -18,6 +21,8 @@ from livekit.plugins import openai
 load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("my-worker")
 logger.setLevel(logging.INFO)
+
+app = Flask(__name__)
 
 
 async def entrypoint(ctx: JobContext):
