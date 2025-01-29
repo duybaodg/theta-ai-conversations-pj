@@ -29,7 +29,7 @@ class VisitorManagementTools(llm.FunctionContext):
         self,
         visitor_name: Annotated[str, llm.TypeInfo(description="Name of the visitor.")],
         employee_name: Annotated[str, llm.TypeInfo(description="Name of the employee to meet.")],
-        PIN: Annotated[str, llm.TypeInfo(description="The employee's pin code.")],
+        # PIN: Annotated[str, llm.TypeInfo(description="The employee's pin code.")],
     ) -> str:
         """Register a visitor for a meeting."""
         url = f"{API_BASE_URL}/visitors/arrive-meeting"
@@ -155,6 +155,24 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
         )
     )
     session.response.create()
+
+
+def extract_visitor_name(user_input: str) -> str:
+    # Looks for "visitor [name]" or "name is [name]"
+    match = re.search(r"(?:visitor\s|name is\s)([a-z\s]+)", user_input, re.IGNORECASE)
+    return match.group(1).strip() if match else None
+
+def extract_employee_name(user_input: str) -> str:
+    # Looks for "meeting with [name]" or "to meet [name]"
+    match = re.search(r"(?:with\s|to meet\s|meeting with\s)([a-z\s]+)", user_input, re.IGNORECASE)
+    return match.group(1).strip() if match else None
+
+def extract_id(user_input: str) -> int:
+    # Extracts the first number from user input
+    match = re.search(r"\d+", user_input)
+    return int(match.group(0)) if match else None
+
+
 
 if __name__ == "__main__":
     cli.run_app(
