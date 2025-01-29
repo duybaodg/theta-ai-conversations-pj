@@ -103,7 +103,7 @@ class VisitorManagementTools(llm.FunctionContext):
         # role: Annotated[int, llm.TypeInfo(description="Admin role ID")],
         pin: Annotated[int, llm.TypeInfo(description="The admin's pin to verify")],
     ) -> str:
-        """List employees if the admin pin is correct."""
+        """List employees if the pin is correct."""
         if pin != 123456: 
             return "Invalid PIN. Access denied."
         
