@@ -12,17 +12,7 @@ from typing import Annotated
 load_dotenv(dotenv_path=".env.local")
 
 # API Base URL
-API_BASE_URL = "http://localhost:5070"
-
-# # Access the homepage
-# try:
-#     response = requests.get(API_BASE_URL)
-#     response.raise_for_status()
-#     data = response.json()
-#     print("Response from API:", data)
-# except requests.exceptions.RequestException as e:
-#     print(f"Failed to connect to the API. Is the server running? {e}")
-
+API_BASE_URL = "https://ai-convo-api.azurewebsites.net"
 
 # Configure Logging
 logging.basicConfig(
@@ -107,6 +97,28 @@ class VisitorManagementTools(llm.FunctionContext):
         logger.info("Reception notified for a general enquiry.")
         return "Reception has been notified. Please wait for assistance."
 
+    @llm.ai_callable()
+    async def list_employees(
+        self,
+        # role: Annotated[int, llm.TypeInfo(description="Admin role ID")],
+        pin: Annotated[int, llm.TypeInfo(description="The admin's pin to verify")],
+    ) -> str:
+        """List employees if the admin pin is correct."""
+        if pin != 123456: 
+            return "Invalid PIN. Access denied."
+        
+        url = f"{API_BASE_URL}/employees"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    employees = await response.json()
+                    return f"Employees: {', '.join([emp['name'] for emp in employees])}"
+                elif response.status == 403:
+                    return "Unauthorized access. Please check your credentials."
+                else:
+                    return f"Failed to retrieve employees: {response.status}"
+                
+
 # Create the FunctionContext
 fnc_ctx = VisitorManagementTools()
 
@@ -124,7 +136,8 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     model = openai.realtime.RealtimeModel(
         instructions=(
             "You are a voice assistant for visitor management. You can help with tasks such as registering visitors, "
-            "couriers, and contractors, signing visitors out, and notifying reception of general enquiries."
+            "couriers, and contractors, signing visitors out, and notifying reception of general enquiries. "
+            "If a user requests to view the employee list, ask for the PIN before proceeding."
         ),
         modalities=["audio", "text"],
         turn_detection=openai.realtime.ServerVadOptions(
