@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+import re
 from dotenv import load_dotenv
 from livekit import rtc
 from livekit.agents import AutoSubscribe, JobContext, WorkerOptions, cli, llm
@@ -12,7 +13,7 @@ from typing import Annotated
 load_dotenv(dotenv_path=".env.local")
 
 # API Base URL
-API_BASE_URL = "https://ai-convo-api.azurewebsites.net"
+API_BASE_URL = "https://ai-convo-api-a5fkhmf4huayhzcv.australiaeast-01.azurewebsites.net"
 
 # Configure Logging
 logging.basicConfig(
@@ -29,11 +30,11 @@ class VisitorManagementTools(llm.FunctionContext):
         self,
         visitor_name: Annotated[str, llm.TypeInfo(description="Name of the visitor.")],
         employee_name: Annotated[str, llm.TypeInfo(description="Name of the employee to meet.")],
-        # PIN: Annotated[str, llm.TypeInfo(description="The employee's pin code.")],
+        pincode: Annotated[int,llm.TypeInfo(description="The employee's pin.")]
     ) -> str:
         """Register a visitor for a meeting."""
         url = f"{API_BASE_URL}/visitors/arrive-meeting"
-        payload = {"VisitorName": visitor_name, "MeetingWith": employee_name, "PIN": PIN}
+        payload = {"visitorName": visitor_name, "meetingWith": employee_name, "pin": pincode}
         async with aiohttp.ClientSession() as session:
             async with session.post(url, json=payload) as response:
                 if response.status == 200:
@@ -104,20 +105,32 @@ class VisitorManagementTools(llm.FunctionContext):
         pin: Annotated[int, llm.TypeInfo(description="The admin's pin to verify")],
     ) -> str:
         """List employees if the pin is correct."""
-        if pin != 123456: 
+        ADMIN_PIN = 987456
+
+
+        if int(pin) != ADMIN_PIN: 
+            logger.debug(f"Invalid PIN entered: {pin}")
             return "Invalid PIN. Access denied."
+        
+        logger.debug("Admin PIN verified. Fetching employee list...")
+
         
         url = f"{API_BASE_URL}/employees"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
                     employees = await response.json()
-                    return f"Employees: {', '.join([emp['name'] for emp in employees])}"
+                    logger.debug(f"Employee Data: {employees}")
+        
+                    employee_names = ', '.join([emp['name'] for emp in employees])
+
+                    return f"Access granted. Employees: {employee_names}"
                 elif response.status == 403:
                     return "Unauthorized access. Please check your credentials."
                 else:
                     return f"Failed to retrieve employees: {response.status}"
                 
+
 
 # Create the FunctionContext
 fnc_ctx = VisitorManagementTools()
@@ -136,7 +149,7 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     model = openai.realtime.RealtimeModel(
         instructions=(
             "You are a voice assistant for visitor management. You can help with tasks such as registering visitors, "
-            "couriers, and contractors, signing visitors out, and notifying reception of general enquiries. "
+            "couriers, and contractors, signing visitors out, and notifying reception of general enquiries, "
             "If a user requests to view the employee list, ask for the PIN before proceeding."
         ),
         modalities=["audio", "text"],
@@ -157,20 +170,20 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     session.response.create()
 
 
-def extract_visitor_name(user_input: str) -> str:
-    # Looks for "visitor [name]" or "name is [name]"
-    match = re.search(r"(?:visitor\s|name is\s)([a-z\s]+)", user_input, re.IGNORECASE)
-    return match.group(1).strip() if match else None
+# def extract_visitor_name(user_input: str) -> str:
+#     # Looks for "visitor [name]" or "name is [name]"
+#     match = re.search(r"(?:visitor\s|name is\s)([a-z\s]+)", user_input, re.IGNORECASE)
+#     return match.group(1).strip() if match else None
 
-def extract_employee_name(user_input: str) -> str:
-    # Looks for "meeting with [name]" or "to meet [name]"
-    match = re.search(r"(?:with\s|to meet\s|meeting with\s)([a-z\s]+)", user_input, re.IGNORECASE)
-    return match.group(1).strip() if match else None
+# def extract_employee_name(user_input: str) -> str:
+#     # Looks for "meeting with [name]" or "to meet [name]"
+#     match = re.search(r"(?:with\s|to meet\s|meeting with\s)([a-z\s]+)", user_input, re.IGNORECASE)
+#     return match.group(1).strip() if match else None
 
-def extract_id(user_input: str) -> int:
-    # Extracts the first number from user input
-    match = re.search(r"\d+", user_input)
-    return int(match.group(0)) if match else None
+# def extract_pin(user_input: str) -> int:
+#     # Extracts the first number from user input
+#     match = re.search(r"\d+", user_input)
+#     return int(match.group(0)) if match else None
 
 
 
