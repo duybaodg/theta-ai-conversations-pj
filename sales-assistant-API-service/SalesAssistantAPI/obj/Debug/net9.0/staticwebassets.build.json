@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "ceJQV+Qsy6oZaFIwaW1I6Up7OK6JxD3X8nzTCCPlQGg=",
+  "Source": "SalesAssistantAPI",
+  "BasePath": "_content/SalesAssistantAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
