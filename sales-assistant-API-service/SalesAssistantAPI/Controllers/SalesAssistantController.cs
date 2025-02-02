@@ -50,7 +50,7 @@ public class SalesAssistantController : ControllerBase
 
     // Handle user questions through POST endpoint
     [HttpPost("ask")]
-    public IActionResult AskQuestion([FromQuery] string question)
+    public IActionResult AskQuestion([FromQuery(Name = "question")] string question)
     {
         if (string.IsNullOrEmpty(question))
         {
@@ -71,14 +71,14 @@ public class SalesAssistantController : ControllerBase
             
             if (completion?.Content != null && completion.Content.Count > 0)
             {
-                return Ok(new { answer = completion.Content[0].Text });
+                return Ok(new { Theta = completion.Content[0].Text });
             }
 
             return BadRequest(new { error = "Could not get a response." });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = $"An error occurred while processing the request: {ex.Message}" });
+            return StatusCode(500, new { error = $"An error occurred: {ex.Message}"});
         }
     }
 }
