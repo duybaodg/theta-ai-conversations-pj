@@ -1,11 +1,3 @@
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.csproj.AssemblyReference.cache
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.GeneratedMSBuildEditorConfig.editorconfig
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.AssemblyInfoInputs.cache
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.AssemblyInfo.cs
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.csproj.CoreCompileInputs.cache
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.MvcApplicationPartsAssemblyInfo.cs
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.MvcApplicationPartsAssemblyInfo.cache
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.sourcelink.json
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/appsettings.Development.json
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/appsettings.json
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/Resources/Products.pdf
@@ -35,6 +27,14 @@
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/OpenAI.dll
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/System.ClientModel.dll
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/System.Memory.Data.dll
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.csproj.AssemblyReference.cache
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.GeneratedMSBuildEditorConfig.editorconfig
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.AssemblyInfoInputs.cache
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.AssemblyInfo.cs
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.csproj.CoreCompileInputs.cache
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.MvcApplicationPartsAssemblyInfo.cs
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.MvcApplicationPartsAssemblyInfo.cache
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.sourcelink.json
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/scopedcss/bundle/SalesAssistantAPI.styles.css
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/staticwebassets.build.json
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/staticwebassets.development.json
