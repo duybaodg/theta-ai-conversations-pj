@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import os
 from livekit import api
-from flask import Flask
 from dotenv import load_dotenv
 
 from livekit import rtc
@@ -21,9 +20,6 @@ from livekit.plugins import openai
 load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("my-worker")
 logger.setLevel(logging.INFO)
-
-app = Flask(__name__)
-
 
 async def entrypoint(ctx: JobContext):
     logger.info(f"connecting to room {ctx.room.name}")
@@ -46,9 +42,6 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
             "You were created as a demo to showcase the capabilities of LiveKit's agents framework."
         ),
         modalities=["audio", "text"],
-        turn_detection=openai.realtime.ServerVadOptions(
-            threshold=0.95, prefix_padding_ms=200, silence_duration_ms=500
-        ),
     )
     agent = MultimodalAgent(model=model)
     agent.start(ctx.room, participant)
