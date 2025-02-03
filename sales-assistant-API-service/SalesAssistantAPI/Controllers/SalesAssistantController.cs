@@ -48,9 +48,9 @@ public class SalesAssistantController : ControllerBase
         return text.ToString();
     }
 
-    // Handle user questions through POST endpoint
-    [HttpPost("ask")]
-    public IActionResult AskQuestion([FromQuery(Name = "question")] string question)
+    // Handle user questions through Get endpoint
+    [HttpGet("ask")]
+    public IActionResult AskQuestion([FromQuery] string question)
     {
         if (string.IsNullOrEmpty(question))
         {
