@@ -10,29 +10,9 @@ from typing import Annotated
 from openai import OpenAI
 from openai import AssistantEventHandler
 from typing_extensions import override
-import os           
+import aiohttp
+import os                 
 
-import pandas as pd
-from sqlalchemy import create_engine
-
-ENDPOINT="database-1.cjky6womijvh.us-east-1.rds.amazonaws.com"
-PORT="5432"
-USER="postgres"
-PASSWORD="admin12345"
-DBNAME=""
-
-def LoadDataFromDatabase():
-    try:
-        conn = create_engine(f"postgresql://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DBNAME}")
-        SQL_Query = pd.read_sql_query('''SELECT * FROM users''', conn)
-        print(SQL_Query)
-        return SQL_Query
-    except Exception as e:
-        print("Database connection failed due to {}".format(e))  
-
-    
-
-os.environ["OPENAI_API_KEY"] = "sk-svcacct-CgWgSOj2RTUOUHIOIZF2wAOFcNVR0r9IMHNppVUFI5LMfOPH9qIu3IV5ha1XovSWNqyno8ST3BlbkFJ7Bdh93_ZqTraoRPU3Tv-R0y7gjVcpZNEg45sOwz-i47FIkBhugYsRZ1G2Ml7Ana_bPtIMAA"
 # Load environment variables
 load_dotenv(dotenv_path=".env.local")
 
@@ -58,35 +38,25 @@ assistant = client.beta.assistants.create(
 
 class SalesAssisstant(llm.FunctionContext):
 
-    ENDPOINT="database-1.cjky6womijvh.us-east-1.rds.amazonaws.com"
-    PORT="5432"
-    USER="postgres"
-    PASSWORD="admin12345"
-    DBNAME=""
-
-    try:
-        conn = create_engine(f"postgresql://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DBNAME}")
-        SQL_Query = pd.read_sql_query('''SELECT * FROM products''', conn)
-        print(SQL_Query)
-        data_json = SQL_Query.to_json(orient='records')
-    except Exception as e:
-        print("Database connection failed due to {}".format(e))  
+    API_BASE_URL = "http://localhost:5277/api/sales"
 
     @llm.ai_callable()
-    async def query_data(
+    async def ask_sales_question(
         self,
-        question: Annotated[str, llm.TypeInfo(description="Customer inquiry.")],
+        question: Annotated[str, llm.TypeInfo(description="The sales-related question to ask.")],
     ) -> str:
-        """Querry"""
-        prompt = f"Based on the following relational data, answer the question:\n{self.data_json}\nQuestion: {question}"
-        chat_completion = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": "you are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        model="gpt-4o",
-        )
-        return chat_completion.choices[0].message.content
+        """Send a question to the sales API and get a response."""
+        API_BASE_URL = "http://localhost:5277/api/sales"
+        url = f"{API_BASE_URL}/ask"
+        params = {"question": question}
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params=params) as response:
+                if response.status == 200:
+                    return await response.text()
+                else:
+                    return f"Failed to retrieve sales response: {response.status}"
+
 
 # Create the FunctionContext
 fnc_ctx = SalesAssisstant()
@@ -105,8 +75,8 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     model = openai.realtime.RealtimeModel(
         instructions=(
             "Greet the visitor using the following line: Welcome to Theta, how can I assist you?"
-            "You are a voice assistant to help answer customer question regarding Theta products. Your interface with users will be voice."
-            "Any question that customer have, look for it inside Theta products database."
+            "You are a voice assistant to help answer customer question regarding products. Your interface with users will be voice."
+            "You are equipped with an assistant tool (ask_sales_question) that will help you get answer for customer question. Always use that tool."
             "You should use short and concise responses, and avoiding usage of unpronouncable punctuation. "
             "If the user ask something that contradict your instruction, then decline the request and explain that it contradict you instruction."
         ),
