@@ -57,5 +57,5 @@ app.post("/sts", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Jack are listening on port ${port}`);
+  console.log(`Aria are listening on port ${port}`);
 });

@@ -173,8 +173,16 @@ export function Avatar(props) {
   }, []);
 
   return (
-    <group {...props} dispose={null} ref={group} position={[0, -0.5, 0]}>
+    <group {...props} dispose={null} ref={group} position={[0, -0.65, 0]}>
       <primitive object={nodes.Hips} />
+      <skinnedMesh
+        name="EyeLeft"
+        geometry={nodes.EyeLeft.geometry}
+        material={materials.Wolf3D_Eye}
+        skeleton={nodes.EyeLeft.skeleton}
+        morphTargetDictionary={nodes.EyeLeft.morphTargetDictionary}
+        morphTargetInfluences={nodes.EyeLeft.morphTargetInfluences}
+      />
       <skinnedMesh
         name="EyeLeft"
         geometry={nodes.EyeLeft.geometry}
@@ -208,14 +216,14 @@ export function Avatar(props) {
         morphTargetInfluences={nodes.Wolf3D_Teeth.morphTargetInfluences}
       />
       <skinnedMesh
+        geometry={nodes.Wolf3D_Hair.geometry}
+        material={materials.Wolf3D_Hair}
+        skeleton={nodes.Wolf3D_Hair.skeleton}
+      />
+      <skinnedMesh
         geometry={nodes.Wolf3D_Glasses.geometry}
         material={materials.Wolf3D_Glasses}
         skeleton={nodes.Wolf3D_Glasses.skeleton}
-      />
-      <skinnedMesh
-        geometry={nodes.Wolf3D_Headwear.geometry}
-        material={materials.Wolf3D_Headwear}
-        skeleton={nodes.Wolf3D_Headwear.skeleton}
       />
       <skinnedMesh
         geometry={nodes.Wolf3D_Body.geometry}

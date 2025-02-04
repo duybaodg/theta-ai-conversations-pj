@@ -6,7 +6,7 @@ const facialExpressions = {
     eyeSquintRight: 0.44,
     noseSneerLeft: 0.1700000727403593,
     noseSneerRight: 0.14000002836874015,
-    mouthPressLeft: 0.61,
+    mouthPressLeft: 0.41,
     mouthPressRight: 0.41000000000000003,
   },
   funnyFace: {

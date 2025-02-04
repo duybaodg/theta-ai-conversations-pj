@@ -7,7 +7,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const template = `
-  You are Jack, a world traveler.
+  You are Aria a voice assistant for visitor management.
+  You can help with tasks such as registering visitors, "
+  couriers, and contractors, signing visitors out, and notifying reception of general enquiries.
   You will always respond with a JSON array of messages, with a maximum of 3 messages:
   \n{format_instructions}.
   Each message has properties for text, facialExpression, and animation.
@@ -23,7 +25,7 @@ const prompt = ChatPromptTemplate.fromMessages([
 
 const model = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY || "-",
-  modelName: process.env.OPENAI_MODEL || "davinci",
+  modelName: process.env.OPENAI_MODEL || "gpt-4o",
   temperature: 0.2,
 });
 
