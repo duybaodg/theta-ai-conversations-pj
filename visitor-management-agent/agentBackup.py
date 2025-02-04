@@ -43,26 +43,11 @@ class VisitorManagementTools(llm.FunctionContext):
         employee_name: Annotated[str, llm.TypeInfo(description="Name of the employee to meet.")],
     ) -> str:
         """Register a visitor for a meeting."""
-        url_post = f"{API_BASE_URL}/visitors/arrive-meeting"
-        url_get = f"{API_BASE_URL}/visitors"
-
+        url = f"{API_BASE_URL}/visitors/arrive-meeting"
         payload = {"visitorName": visitor_name, "meetingWith": employee_name}
         async with aiohttp.ClientSession() as session:
-            async with session.post(url_post, json=payload) as response:
-                if response.status != 200:
-                    return f"Failed to register visitor: {await response.text()}"
-
-            async with session.get(url_get) as response:
-                # return await response.json()
-
-                visitors = await response.json()
-
-            for visitor in sorted(visitors, key=lambda v: v.get("arrivalTime", ""), reverse=True):
-                if visitor.get("name") == visitor_name and visitor.get("meetingWith") == employee_name:
-                    visitor_id = visitor.get("id")
-                    return f"Visitor {visitor_name} has been registered successfully. Your visitor ID is {visitor_id}. Please keep this ID for sign-out."
-
-
+            async with session.post(url, json=payload) as response:
+                return await response.json()
 
     @llm.ai_callable()
     async def arrive_courier(
@@ -70,25 +55,15 @@ class VisitorManagementTools(llm.FunctionContext):
         courier_name: Annotated[str, llm.TypeInfo(description="Name of the courier.")],
     ) -> str:
         """Register a courier arrival."""
-        url_post = f"{API_BASE_URL}/visitors/arrive-courier"
-        url_get = f"{API_BASE_URL}/visitors"
+        url = f"{API_BASE_URL}/visitors/arrive-courier"
         payload = {"CourierName": courier_name}
-  
         async with aiohttp.ClientSession() as session:
-            async with session.post(url_post, json=payload) as response:
-                if response.status != 200:
-                    return f"Failed to register visitor: {await response.text()}"
-
-            async with session.get(url_get) as response:
-                # return await response.json()
-
-                visitors = await response.json()
-
-            for visitor in sorted(visitors, key=lambda v: v.get("arrivalTime", ""), reverse=True):
-                if visitor.get("name") == courier_name and visitor.get("reason") == 'Courier':
-                    visitor_id = visitor.get("id")
-                    return f"Courier {courier_name} has been registered successfully. Your visitor ID is {visitor_id}. Please keep this ID for sign-out."
-
+            async with session.post(url, json=payload) as response:
+                return await response.json()
+                # if response.status == 200:
+                #     return await response.json()
+                # else:
+                #     return f"Failed to register the courier: {response.status}"
 
     @llm.ai_callable()
     async def arrive_contractor(
@@ -97,24 +72,11 @@ class VisitorManagementTools(llm.FunctionContext):
         company_name: Annotated[str, llm.TypeInfo(description="Name of the contractor's company.")],
     ) -> str:
         """Register a contractor arrival."""
-        url_post = f"{API_BASE_URL}/visitors/arrive-contractor"
-        url_get = f"{API_BASE_URL}/visitors"
+        url = f"{API_BASE_URL}/visitors/arrive-contractor"
         payload = {"VisitorName": contractor_name, "Company": company_name}
         async with aiohttp.ClientSession() as session:
-            async with session.post(url_post, json=payload) as response:
-                if response.status != 200:
-                    return f"Failed to register visitor: {await response.text()}"
-
-            async with session.get(url_get) as response:
-                # return await response.json()
-
-                visitors = await response.json()
-
-            for visitor in sorted(visitors, key=lambda v: v.get("arrivalTime", ""), reverse=True):
-                if visitor.get("name") == contractor_name and visitor.get("contractorCompany") == company_name:
-                    visitor_id = visitor.get("id")
-                    return f"Contractor {contractor_name} has been registered successfully. Your visitor ID is {visitor_id}. Please keep this ID for sign-out."
-
+            async with session.post(url, json=payload) as response:
+                return await response.json()
 
     @llm.ai_callable()
     async def sign_out(
@@ -138,15 +100,10 @@ class VisitorManagementTools(llm.FunctionContext):
     @llm.ai_callable()
     async def list_employees(
         self,
-        pin: Annotated[str, llm.TypeInfo(description="Four-digit PIN for access verification.")],
         include_email: Annotated[bool, llm.TypeInfo(description="Include email addresses if True.")]
     ) -> str:
         """List employees if the pin is correct. Optionally include email addresses and IDs if requested. """
     
-        if pin != ADMIN_PIN:
-            logger.warning(f"Incorrect PIN entered: {pin}")
-            return "Invalid PIN. Access denied."
-
         logger.debug("Admin PIN verified. Fetching employee list...")
 
         url = f"{API_BASE_URL}/employees"
@@ -165,19 +122,17 @@ class VisitorManagementTools(llm.FunctionContext):
                         employee_details = ', '.join([emp['name'] for emp in employees])
 
                     return f"Employees: {employee_details}"
-
+                # elif response.status == 403:
+                #     return "Unauthorized access. Please check your credentials."
+                # else:
+                #     return f"Failed to retrieve employees: {response.status}"
                 
 
     @llm.ai_callable()
     async def list_onsite(
-        self,
-        pin: Annotated[str, llm.TypeInfo(description="Four-digit PIN for access verification.")],
+        self
     ) -> str:
         """List people onsite if the pin is correct."""
-
-        if pin != ADMIN_PIN:
-            logger.warning(f"Incorrect PIN entered: {pin}")
-            return "Invalid PIN. Access denied."
 
         logger.debug("Admin PIN verified. Fetching onsite list...")
 
@@ -192,31 +147,11 @@ class VisitorManagementTools(llm.FunctionContext):
                     onsite_details = ', '.join([f"{person['name']} ({person['type']})" for person in on_site])
 
                     return f"Onsite: {onsite_details}"
+                # elif response.status == 403:
+                #     return "Unauthorized access. Please check your credentials."
+                # else:
+                #     return f"Failed to retrieve employees: {response.status}"
 
-    @llm.ai_callable()
-    async def visitors_onsite(
-        self,
-        pin: Annotated[str, llm.TypeInfo(description="Four-digit PIN for access verification.")],
-    ) -> str:
-        """List visitors onsite if the pin is correct."""
-
-        if pin != ADMIN_PIN:
-            logger.warning(f"Incorrect PIN entered: {pin}")
-            return "Invalid PIN. Access denied."
-
-        logger.debug("Admin PIN verified. Fetching visitors onsite list...")
-
-        url = f"{API_BASE_URL}/visitors/on-site"
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                # return await response.json()
-                if response.status == 200:
-                    visitor_onsite = await response.json()
-                    logger.debug(f"Visitors onsite Data: {visitor_onsite}")
-        
-                    visitor_onsite = ', '.join([f"{person['name']} ({person['reason']})" for person in visitor_onsite])
-
-                    return f"Onsite: {visitor_onsite}"
 
 # Create the FunctionContext
 fnc_ctx = VisitorManagementTools()
@@ -235,20 +170,19 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     logger.debug(f"ADMIN PIN: {ADMIN_PIN}")
     model = openai.realtime.RealtimeModel(
         instructions=(
+            # "You are a voice assistant for visitor management. Your first action should always be to greet the users. "
+            # "You can help with tasks such as registering visitors, "
+            # "couriers, and contractors, signing visitors out, and notifying reception of general enquiries. "
+            # "If a user requests to view the employee list or people onsite, ask for the PIN before proceeding. "
+            # "Repeat the PIN that the user has provided, "
+            # "the PIN should be an exact match of the four digits. If the PIN is incorrect, do not give the employee list or the people onsite list. "     
             "You are a voice assistant for visitor management. Your first action should always be to greet the users. "
-            "You can help with tasks such as registering visitors, couriers, and contractors, "
-            "signing visitors out, and notifying reception of general enquiries. "
-            "For security-sensitive requests, such as viewing the employee list, people onsite, or visitors onsite "
-            "you must follow these steps: "
-            "1. **Request a four-digit PIN from the user.** "
-            "2. **Repeat the PIN back to the user for confirmation.** "
-            "3. **Verify the PIN against the correct stored PIN.** " 
-            "4. **Only proceed if the PIN matches exactly.** "
-            "- If the PIN is correct, retrieve the requested information. "
-            "- If the PIN is incorrect, deny access and inform the user that they need the correct PIN. "
-            "5. **If the user does not provide a PIN or refuses to confirm it, do not proceed with the request.** "
-            "6. **If there are multiple incorrect attempts, suggest contacting the receptionist for assistance.** "
-            "If you encounter an issue with their request, ask if they would like to speak to the receptionist. "
+            "You can help with tasks such as registering visitors, couriers, and contractors, signing visitors out, and notifying reception of general enquiries. "
+            "If a user requests to view the employee list or people onsite, ask for the four-digit PIN before proceeding. "
+            "Once the user provides a PIN, repeat it back, wait for the user confirmation, then verify if the PIN matches the correct one. "
+            "If the PIN is correct, provide the requested information. If the PIN is incorrect, do not give the information and inform the user that the PIN is invalid. "
+            "If the user does not confirm the PIN, ask them to provide it again. "
+            "If you encounter an issue or a problem with their request, ask if they would like to see the receptionist. "
         ),
         modalities=["audio", "text"],
         turn_detection=openai.realtime.ServerVadOptions(
@@ -305,6 +239,24 @@ def notify_reception(message: str) -> str:
                             "isVisible": False
                         }
                     ],
+                    # "actions": [
+                    #     {
+                    #         "type": "Action.Submit",
+                    #         "title": "Acknowledge",
+                    #         "data": {
+                    #             "action": "acknowledge_request",
+                    #             "message": message
+                    #         }
+                    #     }
+                    # ],
+                    # "refresh": {
+                    #     "action": {
+                    #         "type": "Action.Execute",
+                    #         "verb": "refresh_acknowledgment",
+                    #         "data": {
+                    #             "message": message
+                    #         }
+                    #     }
                     "actions": [
                         {
                             "type": "Action.ToggleVisibility",
