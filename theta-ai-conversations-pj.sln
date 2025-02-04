@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sales-assistant-API-service", "sales-assistant-API-service", "{BDCBA4C6-498B-BB4B-92D4-A5C05C9FD287}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SalesAssistantAPI", "sales-assistant-API-service\SalesAssistantAPI\SalesAssistantAPI.csproj", "{C3F6A703-0B6D-118C-B83F-A3377C0EC6E8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C3F6A703-0B6D-118C-B83F-A3377C0EC6E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3F6A703-0B6D-118C-B83F-A3377C0EC6E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3F6A703-0B6D-118C-B83F-A3377C0EC6E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3F6A703-0B6D-118C-B83F-A3377C0EC6E8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C3F6A703-0B6D-118C-B83F-A3377C0EC6E8} = {BDCBA4C6-498B-BB4B-92D4-A5C05C9FD287}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EF796568-2F19-468C-B05A-133B46F46645}
+	EndGlobalSection
+EndGlobal
