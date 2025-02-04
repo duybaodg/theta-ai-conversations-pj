@@ -11,7 +11,7 @@ from openai import OpenAI
 from openai import AssistantEventHandler
 from typing_extensions import override
 import aiohttp
-import os                 
+import os           
 
 # Load environment variables
 load_dotenv(dotenv_path=".env.local")
@@ -23,22 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("my-worker")
 
-client = OpenAI(
-    # This is the default and can be omitted
-    api_key=os.environ.get("OPENAI_API_KEY"),
-)
-
-# Create the assistant
-assistant = client.beta.assistants.create(
-    name="Command Prompt Assistant",
-    instructions="You are a helpful assistant for answering general queries.",
-    tools=[],
-    model="gpt-4o",
-)
-
 class SalesAssisstant(llm.FunctionContext):
-
-    API_BASE_URL = "http://localhost:5277/api/sales"
 
     @llm.ai_callable()
     async def ask_sales_question(
@@ -74,15 +59,16 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     logger.info("Starting multimodal agent.")
     model = openai.realtime.RealtimeModel(
         instructions=(
-            "Greet the visitor using the following line: Welcome to Theta, how can I assist you?"
-            "You are a voice assistant to help answer customer question regarding products. Your interface with users will be voice."
-            "You are equipped with an assistant tool (ask_sales_question) that will help you get answer for customer question. Always use that tool."
+            "Greet the visitor using the following line: Welcome, how can I assist you?"
+            "You are equipped with an assistant tool (ask_sales_question) that will answer customer question. Always use that tool."
+            "You are a voice assistant to connect pass customer question to ask_sales_question assistant and get answer for customer. Your interface with users will be voice."
             "You should use short and concise responses, and avoiding usage of unpronouncable punctuation. "
             "If the user ask something that contradict your instruction, then decline the request and explain that it contradict you instruction."
+            "When the user ask for a list of products, no need to give the details of the products unless asked."
         ),
         modalities=["audio", "text"],
         turn_detection=openai.realtime.ServerVadOptions(
-            threshold=0.9, prefix_padding_ms=200, silence_duration_ms=500
+            threshold=0.95, prefix_padding_ms=200, silence_duration_ms=1000
         ),
     )
     agent = MultimodalAgent(model=model, fnc_ctx=fnc_ctx)
