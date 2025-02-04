@@ -1,7 +1,9 @@
 from __future__ import annotations
 import logging
 import re
+import requests
 from dotenv import load_dotenv
+import os
 from livekit import rtc
 from livekit.agents import AutoSubscribe, JobContext, WorkerOptions, cli, llm
 from livekit.agents.multimodal import MultimodalAgent
@@ -13,7 +15,14 @@ from typing import Annotated
 load_dotenv(dotenv_path=".env.local")
 
 # API Base URL
-API_BASE_URL = "https://ai-convo-api-a5fkhmf4huayhzcv.australiaeast-01.azurewebsites.net"
+API_BASE_URL = os.getenv("API_BASE_URL")
+print(f"Loaded url: {API_BASE_URL}") 
+
+# API Base URL
+ADMIN_PIN = os.getenv("ADMIN_PIN")
+print(f"Loaded url: {ADMIN_PIN}") 
+
+SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
 
 # Configure Logging
 logging.basicConfig(
@@ -30,7 +39,6 @@ class VisitorManagementTools(llm.FunctionContext):
         self,
         visitor_name: Annotated[str, llm.TypeInfo(description="Name of the visitor.")],
         employee_name: Annotated[str, llm.TypeInfo(description="Name of the employee to meet.")],
-        # pincode: Annotated[int,llm.TypeInfo(description="The employee's pin.")]
     ) -> str:
         """Register a visitor for a meeting."""
         url = f"{API_BASE_URL}/visitors/arrive-meeting"
@@ -38,13 +46,6 @@ class VisitorManagementTools(llm.FunctionContext):
         async with aiohttp.ClientSession() as session:
             async with session.post(url, json=payload) as response:
                 return await response.json()
-                # if response.status == 200:
-                #     logger.debug(f"Visitor: {visitor_name}")
-                #     return await response.json()
-                # # elif response.status == 404:
-                # #     return "The specified employee was not found. Please check the details and try again."   
-                # else:
-                #     return f"Failed to register the meeting: {response.status}"
 
     @llm.ai_callable()
     async def arrive_courier(
@@ -74,12 +75,6 @@ class VisitorManagementTools(llm.FunctionContext):
         async with aiohttp.ClientSession() as session:
             async with session.post(url, json=payload) as response:
                 return await response.json()
-                # if response.status == 200:
-                #     return await response.json()
-                # # elif response.status == 404:
-                # #     return "The specified company was not found. Please check the details and try again."   
-                # else:
-                #     return f"Failed to register the contractor: {response.status}"
 
     @llm.ai_callable()
     async def sign_out(
@@ -92,34 +87,30 @@ class VisitorManagementTools(llm.FunctionContext):
         async with aiohttp.ClientSession() as session:
             async with session.post(url, json=payload) as response:
                 return await response.json()
-                # if response.status == 200:
-                #     return await response.json()
-                # else:
-                #     return f"Failed to sign out the visitor: {response.status}"
 
     @llm.ai_callable()
     async def general_enquiry(self) -> str:
-        """Handle a general enquiry."""
+        """Send a Slack message to notify reception of a general enquiry."""
         logger.info("Reception notified for a general enquiry.")
-        return "Reception has been notified. Please wait for assistance."
+        message = {"text": "Assistance needed at the front desk."}
+
+        response = requests.post(SLACK_WEBHOOK_URL, json=message)
+    
+        if response.status_code == 200:
+            return "Reception has been notified via Slack."
+        else:
+            return f"Failed to notify reception: {response.status_code}"
+        # return "Reception has been notified. Please wait for assistance."
 
     @llm.ai_callable()
     async def list_employees(
-        self
-        # role: Annotated[int, llm.TypeInfo(description="Admin role ID")],
-        # pin: Annotated[int, llm.TypeInfo(description="The admin's pin to verify")],
+        self,
+        include_email: Annotated[bool, llm.TypeInfo(description="Include email addresses if True.")]
     ) -> str:
-        """List employees if the pin is correct."""
-        # ADMIN_PIN = 97456
-
-
-        # if int(pin) != 1235: 
-        #     logger.debug(f"Invalid PIN entered: {pin}")
-        #     return "Invalid PIN. Access denied."
-        
+        """List employees if the pin is correct. Optionally include email addresses and IDs if requested. """
+    
         logger.debug("Admin PIN verified. Fetching employee list...")
 
-        
         url = f"{API_BASE_URL}/employees"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
@@ -128,14 +119,43 @@ class VisitorManagementTools(llm.FunctionContext):
                     employees = await response.json()
                     logger.debug(f"Employee Data: {employees}")
         
-                    employee_names = ', '.join([emp['name'] for emp in employees])
+                    if include_email:
+                        # Include both name and email
+                        employee_details = ', '.join([f"{emp['name']} ({emp['email']})" for emp in employees])
+                    else:
+                        # Only include names
+                        employee_details = ', '.join([emp['name'] for emp in employees])
 
-                    return f"{employee_names}"
+                    return f"Employees: {employee_details}"
                 elif response.status == 403:
                     return "Unauthorized access. Please check your credentials."
                 else:
                     return f"Failed to retrieve employees: {response.status}"
                 
+
+    @llm.ai_callable()
+    async def list_onsite(
+        self
+    ) -> str:
+        """List people onsite if the pin is correct."""
+
+        logger.debug("Admin PIN verified. Fetching onsite list...")
+
+        url = f"{API_BASE_URL}/on_site"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                # return await response.json()
+                if response.status == 200:
+                    names = await response.json()
+                    logger.debug(f"Onsite Data: {names}")
+        
+                    names = ', '.join([person['name'] for person in names])
+
+                    return f"{names}"
+                elif response.status == 403:
+                    return "Unauthorized access. Please check your credentials."
+                else:
+                    return f"Failed to retrieve employees: {response.status}"
 
 
 # Create the FunctionContext
@@ -152,14 +172,15 @@ async def entrypoint(ctx: JobContext):
 # Run the Multimodal Agent
 def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     logger.info("Starting multimodal agent.")
+    logger.debug(f"ADMIN PIN: {ADMIN_PIN}")
     model = openai.realtime.RealtimeModel(
         instructions=(
-            "You are a voice assistant for visitor management. You can help with tasks such as registering visitors, "
+            "You are a voice assistant for visitor management. Your first action should always be to greet the users. "
+            "You can help with tasks such as registering visitors, "
             "couriers, and contractors, signing visitors out, and notifying reception of general enquiries. "
-            "If a user requests to view the employee list, ask for the PIN before proceeding, "
-            "if the PIN provided is not 1234, then do not provide the employee list, "
-            "if the PIN is 1234, then provide the employee list. "
-        ),
+            "If a user requests to view the employee list or people onsite, ask for the PIN before proceeding. "
+            "The PIN should be an exact match of the four digits. If the PIN is incorrect, do not give the employee list or the people onsite list. "      
+            ),
         modalities=["audio", "text"],
         turn_detection=openai.realtime.ServerVadOptions(
             threshold=0.95, prefix_padding_ms=200, silence_duration_ms=500
@@ -176,8 +197,6 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
         )
     )
     session.response.create()
-
-
 
 if __name__ == "__main__":
     cli.run_app(
