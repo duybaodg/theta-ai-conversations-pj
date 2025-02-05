@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SalesAssistantAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74bf76a652c7861bec00271e509ca4e5c8ac4adc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+96cd0a6a99748a011794659b01a0365eb17f7b1a")]
 [assembly: System.Reflection.AssemblyProductAttribute("SalesAssistantAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SalesAssistantAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
