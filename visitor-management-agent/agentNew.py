@@ -9,14 +9,8 @@ from livekit.agents import AutoSubscribe, JobContext, WorkerOptions, cli, llm
 from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
 import aiohttp
-from fastapi import FastAPI
 from typing import Annotated
-from pydantic import BaseModel
-from livekit.plugins.openai.realtime import RealtimeModel
 
-
-
-app = FastAPI()
 # Load environment variables
 load_dotenv(dotenv_path=".env.local")
 
@@ -29,6 +23,8 @@ ADMIN_PIN = os.getenv("ADMIN_PIN")
 print(f"Loaded url: {ADMIN_PIN}") 
 
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
+TEAMS_WEBHOOK_URL = os.getenv("TEAMS_WEBHOOK_URL")
+print(f"Using Teams Webhook URL: {TEAMS_WEBHOOK_URL}")
 
 # Configure Logging
 logging.basicConfig(
@@ -37,43 +33,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("my-worker")
 
-# request model
-
-class RequestBody(BaseModel):
-    question: str
-
-###########
-
-async def process_user_question(question: str) -> str:
-    model = openai.realtime.RealtimeModel(
-        instructions="You are a visitor management AI assistant...",
-        modalities=["text"]
-    )
-    print("model", model)  # Debugging: Check model details
-    
-    if not model.sessions:
-        session = model.start_session()  # Create a new session if none exists
-    else:
-        session = model.sessions[0]
-
-    print("session", session)  # Debugging: Check session details
-
-    session.conversation.item.create(
-        llm.ChatMessage(
-            role="user",
-            content=question,
-        )
-    )
-    session.response.create()
-    return session.response[-1].content
-
-
-@app.post("/generate-response")
-async def generate_response(request_body: RequestBody):
-    response = await process_user_question(request_body.question)
-    return {"messages": response}
-    
-    
 # Define a FunctionContext for Tools
 class VisitorManagementTools(llm.FunctionContext):
 
@@ -84,11 +43,26 @@ class VisitorManagementTools(llm.FunctionContext):
         employee_name: Annotated[str, llm.TypeInfo(description="Name of the employee to meet.")],
     ) -> str:
         """Register a visitor for a meeting."""
-        url = f"{API_BASE_URL}/visitors/arrive-meeting"
+        url_post = f"{API_BASE_URL}/visitors/arrive-meeting"
+        url_get = f"{API_BASE_URL}/visitors"
+
         payload = {"visitorName": visitor_name, "meetingWith": employee_name}
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload) as response:
-                return await response.json()
+            async with session.post(url_post, json=payload) as response:
+                if response.status != 200:
+                    return f"Failed to register visitor: {await response.text()}"
+
+            async with session.get(url_get) as response:
+                # return await response.json()
+
+                visitors = await response.json()
+
+            for visitor in sorted(visitors, key=lambda v: v.get("arrivalTime", ""), reverse=True):
+                if visitor.get("name") == visitor_name and visitor.get("meetingWith") == employee_name:
+                    visitor_id = visitor.get("id")
+                    return f"Visitor {visitor_name} has been registered successfully. Your visitor ID is {visitor_id}. Please keep this ID for sign-out."
+
+
 
     @llm.ai_callable()
     async def arrive_courier(
@@ -96,15 +70,25 @@ class VisitorManagementTools(llm.FunctionContext):
         courier_name: Annotated[str, llm.TypeInfo(description="Name of the courier.")],
     ) -> str:
         """Register a courier arrival."""
-        url = f"{API_BASE_URL}/visitors/arrive-courier"
+        url_post = f"{API_BASE_URL}/visitors/arrive-courier"
+        url_get = f"{API_BASE_URL}/visitors"
         payload = {"CourierName": courier_name}
+  
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload) as response:
-                return await response.json()
-                # if response.status == 200:
-                #     return await response.json()
-                # else:
-                #     return f"Failed to register the courier: {response.status}"
+            async with session.post(url_post, json=payload) as response:
+                if response.status != 200:
+                    return f"Failed to register visitor: {await response.text()}"
+
+            async with session.get(url_get) as response:
+                # return await response.json()
+
+                visitors = await response.json()
+
+            for visitor in sorted(visitors, key=lambda v: v.get("arrivalTime", ""), reverse=True):
+                if visitor.get("name") == courier_name and visitor.get("reason") == 'Courier':
+                    visitor_id = visitor.get("id")
+                    return f"Courier {courier_name} has been registered successfully. Your visitor ID is {visitor_id}. Please keep this ID for sign-out."
+
 
     @llm.ai_callable()
     async def arrive_contractor(
@@ -113,11 +97,24 @@ class VisitorManagementTools(llm.FunctionContext):
         company_name: Annotated[str, llm.TypeInfo(description="Name of the contractor's company.")],
     ) -> str:
         """Register a contractor arrival."""
-        url = f"{API_BASE_URL}/visitors/arrive-contractor"
+        url_post = f"{API_BASE_URL}/visitors/arrive-contractor"
+        url_get = f"{API_BASE_URL}/visitors"
         payload = {"VisitorName": contractor_name, "Company": company_name}
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=payload) as response:
-                return await response.json()
+            async with session.post(url_post, json=payload) as response:
+                if response.status != 200:
+                    return f"Failed to register visitor: {await response.text()}"
+
+            async with session.get(url_get) as response:
+                # return await response.json()
+
+                visitors = await response.json()
+
+            for visitor in sorted(visitors, key=lambda v: v.get("arrivalTime", ""), reverse=True):
+                if visitor.get("name") == contractor_name and visitor.get("contractorCompany") == company_name:
+                    visitor_id = visitor.get("id")
+                    return f"Contractor {contractor_name} has been registered successfully. Your visitor ID is {visitor_id}. Please keep this ID for sign-out."
+
 
     @llm.ai_callable()
     async def sign_out(
@@ -133,25 +130,23 @@ class VisitorManagementTools(llm.FunctionContext):
 
     @llm.ai_callable()
     async def general_enquiry(self) -> str:
-        """Send a Slack message to notify reception of a general enquiry."""
-        logger.info("Reception notified for a general enquiry.")
-        message = {"text": "Assistance needed at the front desk."}
-
-        response = requests.post(SLACK_WEBHOOK_URL, json=message)
-    
-        if response.status_code == 200:
-            return "Reception has been notified via Slack."
-        else:
-            return f"Failed to notify reception: {response.status_code}"
-        # return "Reception has been notified. Please wait for assistance."
+        """Notify reception when a visitor makes a general enquiry."""
+        
+        message = "A visitor has a general enquiry. Please assist at the front desk."
+        return notify_reception(message)
 
     @llm.ai_callable()
     async def list_employees(
         self,
+        pin: Annotated[str, llm.TypeInfo(description="Four-digit PIN for access verification.")],
         include_email: Annotated[bool, llm.TypeInfo(description="Include email addresses if True.")]
     ) -> str:
         """List employees if the pin is correct. Optionally include email addresses and IDs if requested. """
     
+        if pin != ADMIN_PIN:
+            logger.warning(f"Incorrect PIN entered: {pin}")
+            return "Invalid PIN. Access denied."
+
         logger.debug("Admin PIN verified. Fetching employee list...")
 
         url = f"{API_BASE_URL}/employees"
@@ -170,17 +165,19 @@ class VisitorManagementTools(llm.FunctionContext):
                         employee_details = ', '.join([emp['name'] for emp in employees])
 
                     return f"Employees: {employee_details}"
-                elif response.status == 403:
-                    return "Unauthorized access. Please check your credentials."
-                else:
-                    return f"Failed to retrieve employees: {response.status}"
+
                 
 
     @llm.ai_callable()
     async def list_onsite(
-        self
+        self,
+        pin: Annotated[str, llm.TypeInfo(description="Four-digit PIN for access verification.")],
     ) -> str:
         """List people onsite if the pin is correct."""
+
+        if pin != ADMIN_PIN:
+            logger.warning(f"Incorrect PIN entered: {pin}")
+            return "Invalid PIN. Access denied."
 
         logger.debug("Admin PIN verified. Fetching onsite list...")
 
@@ -189,17 +186,37 @@ class VisitorManagementTools(llm.FunctionContext):
             async with session.get(url) as response:
                 # return await response.json()
                 if response.status == 200:
-                    names = await response.json()
-                    logger.debug(f"Onsite Data: {names}")
+                    on_site = await response.json()
+                    logger.debug(f"Onsite Data: {on_site}")
         
-                    names = ', '.join([person['name'] for person in names])
+                    onsite_details = ', '.join([f"{person['name']} ({person['type']})" for person in on_site])
 
-                    return f"{names}"
-                elif response.status == 403:
-                    return "Unauthorized access. Please check your credentials."
-                else:
-                    return f"Failed to retrieve employees: {response.status}"
+                    return f"Onsite: {onsite_details}"
 
+    @llm.ai_callable()
+    async def visitors_onsite(
+        self,
+        pin: Annotated[str, llm.TypeInfo(description="Four-digit PIN for access verification.")],
+    ) -> str:
+        """List visitors onsite if the pin is correct."""
+
+        if pin != ADMIN_PIN:
+            logger.warning(f"Incorrect PIN entered: {pin}")
+            return "Invalid PIN. Access denied."
+
+        logger.debug("Admin PIN verified. Fetching visitors onsite list...")
+
+        url = f"{API_BASE_URL}/visitors/on-site"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                # return await response.json()
+                if response.status == 200:
+                    visitor_onsite = await response.json()
+                    logger.debug(f"Visitors onsite Data: {visitor_onsite}")
+        
+                    visitor_onsite = ', '.join([f"{person['name']} ({person['reason']})" for person in visitor_onsite])
+
+                    return f"Onsite: {visitor_onsite}"
 
 # Create the FunctionContext
 fnc_ctx = VisitorManagementTools()
@@ -219,11 +236,20 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     model = openai.realtime.RealtimeModel(
         instructions=(
             "You are a voice assistant for visitor management. Your first action should always be to greet the users. "
-            "You can help with tasks such as registering visitors, "
-            "couriers, and contractors, signing visitors out, and notifying reception of general enquiries. "
-            "If a user requests to view the employee list or people onsite, ask for the PIN before proceeding. "
-            "The PIN should be an exact match of the four digits. If the PIN is incorrect, do not give the employee list or the people onsite list. "      
-            ),
+            "You can help with tasks such as registering visitors, couriers, and contractors, "
+            "signing visitors out, and notifying reception of general enquiries. "
+            "For security-sensitive requests, such as viewing the employee list, people onsite, or visitors onsite "
+            "you must follow these steps: "
+            "1. **Request a four-digit PIN from the user.** "
+            "2. **Repeat the PIN back to the user for confirmation.** "
+            "3. **Verify the PIN against the correct stored PIN.** " 
+            "4. **Only proceed if the PIN matches exactly.** "
+            "- If the PIN is correct, retrieve the requested information. "
+            "- If the PIN is incorrect, deny access and inform the user that they need the correct PIN. "
+            "5. **If the user does not provide a PIN or refuses to confirm it, do not proceed with the request.** "
+            "6. **If there are multiple incorrect attempts, suggest contacting the receptionist for assistance.** "
+            "If you encounter an issue with their request, ask if they would like to speak to the receptionist. "
+        ),
         modalities=["audio", "text"],
         turn_detection=openai.realtime.ServerVadOptions(
             threshold=0.95, prefix_padding_ms=200, silence_duration_ms=500
@@ -232,11 +258,7 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     agent = MultimodalAgent(model=model, fnc_ctx=fnc_ctx)
     agent.start(ctx.room, participant)
 
-    if not model.sessions:
-        print("Current sessions:", model.sessions)
-        return {"error": "No active session available"}
     session = model.sessions[0]
-
     session.conversation.item.create(
         llm.ChatMessage(
             role="assistant",
@@ -244,6 +266,78 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
         )
     )
     session.response.create()
+
+
+def notify_reception(message: str) -> str:
+    """Send a notification to both Microsoft Teams and Slack."""
+    
+    logger.info("Notifying reception via Microsoft Teams and Slack.")
+
+    headers = {"Content-Type": "application/json"}
+
+    # Microsoft Teams
+    teams_message = {
+        "type": "message",
+        "attachments": [
+            {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "body": [
+                        {
+                            "type": "TextBlock",
+                            "size": "Large",
+                            "weight": "Bolder",
+                            "text": "VISITOR ASSISTANCE NEEDED"
+                        },
+                        {
+                            "type": "TextBlock",
+                            "text": message,
+                            "wrap": True
+                        },
+                        {
+                            "type": "TextBlock",
+                            "text": "Request acknowledged by Reception",
+                            "wrap": True,
+                            "id": "acknowledgedText",
+                            "isVisible": False
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "type": "Action.ToggleVisibility",
+                            "title": "Acknowledge",
+                            "targetElements": ["acknowledgedText"]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+
+    # Slack Message
+    slack_message = {
+        "text": f"*Visitor Assistance Needed* \n{message}"
+    }
+
+    # Send to Microsoft Teams
+    teams_response = requests.post(TEAMS_WEBHOOK_URL, json=teams_message, headers=headers)
+
+    # Send to Slack
+    slack_response = requests.post(SLACK_WEBHOOK_URL, json=slack_message, headers=headers)
+
+    # Check Responses
+    if teams_response.status_code == 200 and slack_response.status_code == 200:
+        return "Reception has been notified via Microsoft Teams and Slack."
+    elif teams_response.status_code != 200:
+        logger.error(f"Failed to notify Teams: {teams_response.status_code} - {teams_response.text}")
+        return f"Failed to notify Teams: {teams_response.status_code}"
+    elif slack_response.status_code != 200:
+        logger.error(f"Failed to notify Slack: {slack_response.status_code} - {slack_response.text}")
+        return f"Failed to notify Slack: {slack_response.status_code}"
+
 
 if __name__ == "__main__":
     cli.run_app(
