@@ -12,7 +12,8 @@ namespace SalesAssistantAPI.Controllers;
 public class SalesAssistantController : ControllerBase
 {
     private readonly ChatClient _chatClient;
-    private readonly string _productInfo;
+    private readonly string _allDocuments;
+    // private readonly string _productInfo;
 
     public SalesAssistantController()
     {
@@ -23,28 +24,37 @@ public class SalesAssistantController : ControllerBase
         );
 
         // Load product information from PDF
-        var pdfPath = Path.Combine(Directory.GetCurrentDirectory(), "Resources", "products.pdf");
-        _productInfo = ExtractTextFromPdf(pdfPath);
+        var pdfFiles = Directory.GetFiles("Resources", "*.pdf"); 
+        
+        _allDocuments = ExtractTextFromMultiplePdfs(pdfFiles);
     }
 
-    // Extract text content from PDF file
-    private static string ExtractTextFromPdf(string pdfPath)
+    //read multipule PDF
+    private static string ExtractTextFromMultiplePdfs(string[] pdfPaths)
     {
-        if (!System.IO.File.Exists(pdfPath))
-        {
-            return "Product information file not found.";
-        }
-
         var text = new StringBuilder();
-        using (var pdfReader = new PdfReader(pdfPath))
-        using (var pdfDocument = new PdfDocument(pdfReader))
+
+        foreach (var pdfPath in pdfPaths)
         {
-            for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
+            if (!System.IO.File.Exists(pdfPath))
             {
-                var page = pdfDocument.GetPage(i);
-                text.Append(PdfTextExtractor.GetTextFromPage(page));
+                text.AppendLine($"[Warning] {pdfPath} not found.\n");
+                continue;
+            }
+
+              text.AppendLine($"\n Document: {Path.GetFileName(pdfPath)}\n");
+
+            using (var pdfReader = new PdfReader(pdfPath))
+            using (var pdfDocument = new PdfDocument(pdfReader))
+            {
+                for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
+                {
+                    var page = pdfDocument.GetPage(i);
+                    text.AppendLine(PdfTextExtractor.GetTextFromPage(page));
+                }
             }
         }
+
         return text.ToString();
     }
 
@@ -62,7 +72,7 @@ public class SalesAssistantController : ControllerBase
             // Create system and user messages with explicit type
             ChatMessage[] messages = new ChatMessage[]
             {
-                new SystemChatMessage($"You are a sales assistant. Here is the product information:\n{_productInfo}"),
+                new SystemChatMessage($"You are a knowledgeable assistant. Below is important company information, including product details, refund policies, and general policies:\n{_allDocuments}"),
                 new UserChatMessage(question)
             };
 

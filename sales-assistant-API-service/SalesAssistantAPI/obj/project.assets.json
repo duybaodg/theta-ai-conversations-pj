@@ -5011,19 +5011,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\janpa\\.nuget\\packages\\": {}
+    "/Users/mountbatten/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\janpa\\OneDrive\\Desktop\\New AI Conversations\\theta-ai-conversations-pj\\sales-assistant-API-service\\SalesAssistantAPI\\SalesAssistantAPI.csproj",
+      "projectUniqueName": "/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
       "projectName": "SalesAssistantAPI",
-      "projectPath": "C:\\Users\\janpa\\OneDrive\\Desktop\\New AI Conversations\\theta-ai-conversations-pj\\sales-assistant-API-service\\SalesAssistantAPI\\SalesAssistantAPI.csproj",
-      "packagesPath": "C:\\Users\\janpa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\janpa\\OneDrive\\Desktop\\New AI Conversations\\theta-ai-conversations-pj\\sales-assistant-API-service\\SalesAssistantAPI\\obj\\",
+      "projectPath": "/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
+      "packagesPath": "/Users/mountbatten/.nuget/packages/",
+      "outputPath": "/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\janpa\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/mountbatten/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -5085,7 +5085,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.101/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
