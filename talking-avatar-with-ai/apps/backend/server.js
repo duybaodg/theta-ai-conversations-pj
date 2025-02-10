@@ -1,5 +1,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
+import axios from "axios";
+
 import express from "express";
 import { openAIChain, parser } from "./modules/openAI.mjs";
 import { lipSync } from "./modules/lip-sync.mjs";
@@ -15,6 +17,8 @@ app.use(express.json());
 app.use(cors());
 const port = 3000;
 
+const AGENT_API_URL = "http://localhost:8000/generate-response";
+
 app.get("/voices", async (req, res) => {
   res.send(await voice.getVoices(elevenLabsApiKey));
 });
@@ -26,34 +30,33 @@ app.post("/tts", async (req, res) => {
     res.send({ messages: defaultMessages });
     return;
   }
-  let openAImessages;
+  let response;
   try {
-    openAImessages = await openAIChain.invoke({
-      question: userMessage,
-      format_instructions: parser.getFormatInstructions(),
-    });
+    const agentResponse = await axios.post(AGENT_API_URL, { question: userMessage });
+    console.log(agentResponse.data);
+
+    response = agentResponse.data.messages;
+    console.log(response);
   } catch (error) {
-    openAImessages = defaultResponse;
+    response = defaultResponse;
   }
-  openAImessages = await lipSync({ messages: openAImessages.messages });
-  res.send({ messages: openAImessages });
+  response = await lipSync({ messages: response });
+  res.send({ messages: response });
 });
 
 app.post("/sts", async (req, res) => {
   const base64Audio = req.body.audio;
   const audioData = Buffer.from(base64Audio, "base64");
   const userMessage = await convertAudioToText({ audioData });
-  let openAImessages;
+  let response;
   try {
-    openAImessages = await openAIChain.invoke({
-      question: userMessage,
-      format_instructions: parser.getFormatInstructions(),
-    });
+    const agentResponse = await axios.post(AGENT_API_URL, { question: userMessage }); 
+    response = agentResponse.data.messages;
   } catch (error) {
-    openAImessages = defaultResponse;
+    response = defaultResponse;
   }
-  openAImessages = await lipSync({ messages: openAImessages.messages });
-  res.send({ messages: openAImessages });
+  response = await lipSync({ messages: response });
+  res.send({ messages: response });
 });
 
 app.listen(port, () => {

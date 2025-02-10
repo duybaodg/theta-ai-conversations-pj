@@ -9,8 +9,14 @@ from livekit.agents import AutoSubscribe, JobContext, WorkerOptions, cli, llm
 from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
 import aiohttp
+from fastapi import FastAPI
 from typing import Annotated
+from pydantic import BaseModel
+from livekit.plugins.openai.realtime import RealtimeModel
 
+
+
+app = FastAPI()
 # Load environment variables
 load_dotenv(dotenv_path=".env.local")
 
@@ -31,6 +37,43 @@ logging.basicConfig(
 )
 logger = logging.getLogger("my-worker")
 
+# request model
+
+class RequestBody(BaseModel):
+    question: str
+
+###########
+
+async def process_user_question(question: str) -> str:
+    model = openai.realtime.RealtimeModel(
+        instructions="You are a visitor management AI assistant...",
+        modalities=["text"]
+    )
+    print("model", model)  # Debugging: Check model details
+    
+    if not model.sessions:
+        session = model.start_session()  # Create a new session if none exists
+    else:
+        session = model.sessions[0]
+
+    print("session", session)  # Debugging: Check session details
+
+    session.conversation.item.create(
+        llm.ChatMessage(
+            role="user",
+            content=question,
+        )
+    )
+    session.response.create()
+    return session.response[-1].content
+
+
+@app.post("/generate-response")
+async def generate_response(request_body: RequestBody):
+    response = await process_user_question(request_body.question)
+    return {"messages": response}
+    
+    
 # Define a FunctionContext for Tools
 class VisitorManagementTools(llm.FunctionContext):
 
@@ -189,7 +232,11 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     agent = MultimodalAgent(model=model, fnc_ctx=fnc_ctx)
     agent.start(ctx.room, participant)
 
+    if not model.sessions:
+        print("Current sessions:", model.sessions)
+        return {"error": "No active session available"}
     session = model.sessions[0]
+
     session.conversation.item.create(
         llm.ChatMessage(
             role="assistant",

@@ -4,3 +4,5 @@ livekit-plugins-openai>=0.10.9
 python-dotenv~=1.0
 langchain-core>=0.1.0
 langchain-openai>=0.1.0
+fastapi>=0.68.0
+uvicorn>=0.15.0

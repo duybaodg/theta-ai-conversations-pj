@@ -16,7 +16,6 @@ from livekit.agents import (
 from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
 
-
 load_dotenv(dotenv_path=".env.local")
 logger = logging.getLogger("my-worker")
 logger.setLevel(logging.INFO)
