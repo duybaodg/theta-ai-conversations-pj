@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "u9QvslCJvT4=",
+  "dgSpecHash": "cUgBfrA1ZKA=",
   "success": true,
-  "projectFilePath": "/Users/caubanh/Desktop/ai-agent-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
+  "projectFilePath": "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
   "expectedPackageFiles": [
     "/Users/caubanh/.nuget/packages/itext/9.0.0/itext.9.0.0.nupkg.sha512",
     "/Users/caubanh/.nuget/packages/itext.commons/9.0.0/itext.commons.9.0.0.nupkg.sha512",

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/caubanh/Desktop/ai-agent-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj": {}
+    "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj": {}
   },
   "projects": {
-    "/Users/caubanh/Desktop/ai-agent-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj": {
+    "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/caubanh/Desktop/ai-agent-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
+        "projectUniqueName": "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
         "projectName": "SalesAssistantAPI",
-        "projectPath": "/Users/caubanh/Desktop/ai-agent-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
+        "projectPath": "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
         "packagesPath": "/Users/caubanh/.nuget/packages/",
-        "outputPath": "/Users/caubanh/Desktop/ai-agent-pj/sales-assistant-API-service/SalesAssistantAPI/obj/",
+        "outputPath": "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/caubanh/.nuget/NuGet/NuGet.Config"
