@@ -132,8 +132,18 @@ class VisitorManagementTools(llm.FunctionContext):
     async def general_enquiry(self) -> str:
         """Notify reception when a visitor makes a general enquiry."""
         
+        notification = "GENERAL ENQUIRY"
         message = "A visitor has a general enquiry. Please assist at the front desk."
-        return notify_reception(message)
+        return notify_reception(notification,message)
+    
+    @llm.ai_callable()
+    async def call_reception(self) -> str:
+        """Notify reception for assistance."""
+        
+        notification = "VISITOR ASSISTANCE NEEDED"
+        message = "A visitor has a needs assistance with their request. Please assist at the front desk."
+        return notify_reception(notification, message)
+
 
     @llm.ai_callable()
     async def list_employees(
@@ -165,8 +175,6 @@ class VisitorManagementTools(llm.FunctionContext):
                         employee_details = ', '.join([emp['name'] for emp in employees])
 
                     return f"Employees: {employee_details}"
-
-                
 
     @llm.ai_callable()
     async def list_onsite(
@@ -218,6 +226,7 @@ class VisitorManagementTools(llm.FunctionContext):
 
                     return f"Onsite: {visitor_onsite}"
 
+
 # Create the FunctionContext
 fnc_ctx = VisitorManagementTools()
 
@@ -248,7 +257,6 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
             "- If the PIN is incorrect, deny access and inform the user that they need the correct PIN. "
             "5. **If the user does not provide a PIN or refuses to confirm it, do not proceed with the request.** "
             "6. **If there are multiple incorrect attempts, suggest contacting the receptionist for assistance.** "
-            "If you encounter an issue with their request, ask if they would like to speak to the receptionist. "
         ),
         modalities=["audio", "text"],
         turn_detection=openai.realtime.ServerVadOptions(
@@ -268,7 +276,7 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
     session.response.create()
 
 
-def notify_reception(message: str) -> str:
+def notify_reception(notification: str, message: str) -> str:
     """Send a notification to both Microsoft Teams and Slack."""
     
     logger.info("Notifying reception via Microsoft Teams and Slack.")
@@ -290,7 +298,7 @@ def notify_reception(message: str) -> str:
                             "type": "TextBlock",
                             "size": "Large",
                             "weight": "Bolder",
-                            "text": "VISITOR ASSISTANCE NEEDED"
+                            "text": notification,
                         },
                         {
                             "type": "TextBlock",
@@ -337,6 +345,7 @@ def notify_reception(message: str) -> str:
     elif slack_response.status_code != 200:
         logger.error(f"Failed to notify Slack: {slack_response.status_code} - {slack_response.text}")
         return f"Failed to notify Slack: {slack_response.status_code}"
+
 
 
 if __name__ == "__main__":
