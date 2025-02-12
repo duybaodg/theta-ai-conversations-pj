@@ -345,19 +345,19 @@
           }
         }
       },
-      "OpenAI/2.1.0": {
+      "OpenAI/2.2.0-beta.1": {
         "type": "package",
         "dependencies": {
           "System.ClientModel": "1.2.1",
           "System.Diagnostics.DiagnosticSource": "6.0.1"
         },
         "compile": {
-          "lib/net6.0/OpenAI.dll": {
+          "lib/net8.0/OpenAI.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/OpenAI.dll": {
+          "lib/net8.0/OpenAI.dll": {
             "related": ".xml"
           }
         }
@@ -1925,10 +1925,10 @@
         "packageIcon.png"
       ]
     },
-    "OpenAI/2.1.0": {
-      "sha512": "zl72nyP4O94ZyEoCLoE8qoc5vp8kSJmRuqR+UdK+jNIjFJGWJYjsb4rAGpMWWRTbPYuk82E8myMJdVQurMLDnQ==",
+    "OpenAI/2.2.0-beta.1": {
+      "sha512": "h0NKU7n5CppiyhZvcu6RtmrHUnN8IUpvbfCuEhFMPaeWKJIGEpRVP3PVywuJAqPugXp0zMFM3afFQFDQ8Sjiaw==",
       "type": "package",
-      "path": "openai/2.1.0",
+      "path": "openai/2.2.0-beta.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1937,9 +1937,11 @@
         "README.md",
         "lib/net6.0/OpenAI.dll",
         "lib/net6.0/OpenAI.xml",
+        "lib/net8.0/OpenAI.dll",
+        "lib/net8.0/OpenAI.xml",
         "lib/netstandard2.0/OpenAI.dll",
         "lib/netstandard2.0/OpenAI.xml",
-        "openai.2.1.0.nupkg.sha512",
+        "openai.2.2.0-beta.1.nupkg.sha512",
         "openai.nuspec"
       ]
     },
@@ -5006,7 +5008,7 @@
   "projectFileDependencyGroups": {
     "net9.0": [
       "Microsoft.AspNetCore.OpenApi >= 9.0.0",
-      "OpenAI >= 2.1.0",
+      "OpenAI >= 2.2.0-beta.1",
       "itext7 >= 9.0.0"
     ]
   },
@@ -5059,7 +5061,7 @@
           },
           "OpenAI": {
             "target": "Package",
-            "version": "[2.1.0, )"
+            "version": "[2.2.0-beta.1, )"
           },
           "itext7": {
             "target": "Package",

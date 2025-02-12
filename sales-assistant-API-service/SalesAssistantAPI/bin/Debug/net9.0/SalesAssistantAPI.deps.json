@@ -9,7 +9,7 @@
       "SalesAssistantAPI/1.0.0": {
         "dependencies": {
           "Microsoft.AspNetCore.OpenApi": "9.0.0",
-          "OpenAI": "2.1.0",
+          "OpenAI": "2.2.0-beta.1",
           "itext7": "9.0.0"
         },
         "runtime": {
@@ -201,15 +201,15 @@
           }
         }
       },
-      "OpenAI/2.1.0": {
+      "OpenAI/2.2.0-beta.1": {
         "dependencies": {
           "System.ClientModel": "1.2.1",
           "System.Diagnostics.DiagnosticSource": "6.0.1"
         },
         "runtime": {
-          "lib/net6.0/OpenAI.dll": {
-            "assemblyVersion": "2.1.0.0",
-            "fileVersion": "2.1.0.0"
+          "lib/net8.0/OpenAI.dll": {
+            "assemblyVersion": "2.2.0.0",
+            "fileVersion": "2.2.0.0"
           }
         }
       },
@@ -895,12 +895,12 @@
       "path": "newtonsoft.json/13.0.1",
       "hashPath": "newtonsoft.json.13.0.1.nupkg.sha512"
     },
-    "OpenAI/2.1.0": {
+    "OpenAI/2.2.0-beta.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-zl72nyP4O94ZyEoCLoE8qoc5vp8kSJmRuqR+UdK+jNIjFJGWJYjsb4rAGpMWWRTbPYuk82E8myMJdVQurMLDnQ==",
-      "path": "openai/2.1.0",
-      "hashPath": "openai.2.1.0.nupkg.sha512"
+      "sha512": "sha512-h0NKU7n5CppiyhZvcu6RtmrHUnN8IUpvbfCuEhFMPaeWKJIGEpRVP3PVywuJAqPugXp0zMFM3afFQFDQ8Sjiaw==",
+      "path": "openai/2.2.0-beta.1",
+      "hashPath": "openai.2.2.0-beta.1.nupkg.sha512"
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
       "type": "package",

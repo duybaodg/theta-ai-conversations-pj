@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using OpenAI;
-using OpenAI.Chat;
-using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Canvas.Parser;
+using System;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace SalesAssistantAPI.Controllers;
 
@@ -11,56 +12,19 @@ namespace SalesAssistantAPI.Controllers;
 [ApiController]
 public class SalesAssistantController : ControllerBase
 {
-    private readonly ChatClient _chatClient;
-    private readonly string _allDocuments;
-    // private readonly string _productInfo;
+    private readonly HttpClient _httpClient;
+    private readonly string _apiKey;
+    private readonly string _assistantId;
 
     public SalesAssistantController()
     {
-        // Initialize ChatClient with model and API key
-        _chatClient = new ChatClient(
-            model: "gpt-4",
-            apiKey: Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "sk-svcacct-CgWgSOj2RTUOUHIOIZF2wAOFcNVR0r9IMHNppVUFI5LMfOPH9qIu3IV5ha1XovSWNqyno8ST3BlbkFJ7Bdh93_ZqTraoRPU3Tv-R0y7gjVcpZNEg45sOwz-i47FIkBhugYsRZ1G2Ml7Ana_bPtIMAA"
-        );
-
-        // Load product information from PDF
-        var pdfFiles = Directory.GetFiles("Resources", "*.pdf"); 
-        
-        _allDocuments = ExtractTextFromMultiplePdfs(pdfFiles);
+        _httpClient = new HttpClient();
+        _apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "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";
+        _assistantId = "asst_Sf96owAWcAFqaAkdVKt377Fi";  
     }
 
-    //read multipule PDF
-    private static string ExtractTextFromMultiplePdfs(string[] pdfPaths)
-    {
-        var text = new StringBuilder();
-
-        foreach (var pdfPath in pdfPaths)
-        {
-            if (!System.IO.File.Exists(pdfPath))
-            {
-                text.AppendLine($"[Warning] {pdfPath} not found.\n");
-                continue;
-            }
-
-              text.AppendLine($"\n Document: {Path.GetFileName(pdfPath)}\n");
-
-            using (var pdfReader = new PdfReader(pdfPath))
-            using (var pdfDocument = new PdfDocument(pdfReader))
-            {
-                for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
-                {
-                    var page = pdfDocument.GetPage(i);
-                    text.AppendLine(PdfTextExtractor.GetTextFromPage(page));
-                }
-            }
-        }
-
-        return text.ToString();
-    }
-
-    // Handle user questions through Get endpoint
     [HttpGet("ask")]
-    public IActionResult AskQuestion([FromQuery] string question)
+    public async Task<IActionResult> AskQuestion([FromQuery] string question)
     {
         if (string.IsNullOrEmpty(question))
         {
@@ -69,26 +33,73 @@ public class SalesAssistantController : ControllerBase
 
         try
         {
-            // Create system and user messages with explicit type
-            ChatMessage[] messages = new ChatMessage[]
-            {
-                new SystemChatMessage($"You are a knowledgeable assistant. Below is important company information, including product details, refund policies, and general policies:\n{_allDocuments}"),
-                new UserChatMessage(question)
-            };
+            // 1. create a new chat -  Thread
+            var threadRequest = new { };
+            var threadRequestContent = new StringContent(JsonSerializer.Serialize(threadRequest), Encoding.UTF8, "application/json");
 
-            // Get chat completion
-            ChatCompletion completion = _chatClient.CompleteChat(messages);
-            
-            if (completion?.Content != null && completion.Content.Count > 0)
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+            _httpClient.DefaultRequestHeaders.Add("OpenAI-Beta", "assistants=v2");
+
+            var threadResponse = await _httpClient.PostAsync("https://api.openai.com/v1/threads", threadRequestContent);
+            threadResponse.EnsureSuccessStatusCode();
+            var threadResponseBody = await threadResponse.Content.ReadAsStringAsync();
+            var threadId = JsonDocument.Parse(threadResponseBody).RootElement.GetProperty("id").GetString();
+
+            // 2. send user's question
+            var messageRequest = new
             {
-                return Ok(new { Theta = completion.Content[0].Text });
+                role = "user",
+                content = question
+            };
+            var messageRequestContent = new StringContent(JsonSerializer.Serialize(messageRequest), Encoding.UTF8, "application/json");
+
+            var messageResponse = await _httpClient.PostAsync($"https://api.openai.com/v1/threads/{threadId}/messages", messageRequestContent);
+            messageResponse.EnsureSuccessStatusCode();
+
+            // 3. Assistant
+            var runRequest = new { assistant_id = _assistantId };
+            var runRequestContent = new StringContent(JsonSerializer.Serialize(runRequest), Encoding.UTF8, "application/json");
+
+            var runResponse = await _httpClient.PostAsync($"https://api.openai.com/v1/threads/{threadId}/runs", runRequestContent);
+            runResponse.EnsureSuccessStatusCode();
+            var runResponseBody = await runResponse.Content.ReadAsStringAsync();
+            var runId = JsonDocument.Parse(runResponseBody).RootElement.GetProperty("id").GetString();
+
+            // 4️. waiting for completed 
+            string runStatus;
+            do
+            {
+                await Task.Delay(2000); // every 2s
+                var runStatusResponse = await _httpClient.GetAsync($"https://api.openai.com/v1/threads/{threadId}/runs/{runId}");
+                runStatusResponse.EnsureSuccessStatusCode();
+                var runStatusBody = await runStatusResponse.Content.ReadAsStringAsync();
+                runStatus = JsonDocument.Parse(runStatusBody).RootElement.GetProperty("status").GetString();
+            } while (runStatus != "completed");
+
+            // 5️. get respond from assistant API
+            var messagesResponse = await _httpClient.GetAsync($"https://api.openai.com/v1/threads/{threadId}/messages");
+            messagesResponse.EnsureSuccessStatusCode();
+            var messagesBody = await messagesResponse.Content.ReadAsStringAsync();
+            var messagesJson = JsonDocument.Parse(messagesBody).RootElement.GetProperty("data");
+
+            // simplify the answer
+            string assistantReply = "";
+            foreach (var message in messagesJson.EnumerateArray())
+            {
+                if (message.GetProperty("role").GetString() == "assistant")
+                {
+                    assistantReply = message.GetProperty("content")[0].GetProperty("text").GetProperty("value").GetString();
+                    break;
+                }
             }
 
-            return BadRequest(new { error = "Could not get a response." });
+            // respond simplier respond
+            return Ok(new { Theta = assistantReply });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = $"An error occurred: {ex.Message}"});
+            return StatusCode(500, new { error = $"An error occurred: {ex.Message}" });
         }
     }
 }

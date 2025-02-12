@@ -1,8 +1,6 @@
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/appsettings.Development.json
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/appsettings.json
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/Resources/Company_General_Policy.pdf
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/Resources/Products.pdf
-/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/Resources/Refund_Policy.pdf
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/SalesAssistantAPI.staticwebassets.endpoints.json
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/SalesAssistantAPI
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/SalesAssistantAPI.deps.json
@@ -53,3 +51,6 @@
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.pdb
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/SalesAssistantAPI.genruntimeconfig.cache
 /Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/Debug/net9.0/ref/SalesAssistantAPI.dll
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/Resources/.DS_Store
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/Resources/Insurance_Policy_Document.pdf
+/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/bin/Debug/net9.0/Resources/Refund Policy.pdf
