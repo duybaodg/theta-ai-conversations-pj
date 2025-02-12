@@ -1,25 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj": {}
+    "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj": {}
   },
   "projects": {
-    "/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj": {
+    "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
+        "projectUniqueName": "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
         "projectName": "SalesAssistantAPI",
-        "projectPath": "/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
-        "packagesPath": "/Users/mountbatten/.nuget/packages/",
-        "outputPath": "/Users/mountbatten/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/",
+        "projectPath": "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/SalesAssistantAPI.csproj",
+        "packagesPath": "/Users/caubanh/.nuget/packages/",
+        "outputPath": "/Users/caubanh/Desktop/theta-ai-conversations-pj/sales-assistant-API-service/SalesAssistantAPI/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/mountbatten/.nuget/NuGet/NuGet.Config"
+          "/Users/caubanh/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
+          "/usr/local/share/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -76,7 +77,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.101/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
