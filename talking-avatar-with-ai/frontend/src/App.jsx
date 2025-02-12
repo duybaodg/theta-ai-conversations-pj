@@ -27,7 +27,6 @@ import { CloseIcon } from "./components/CloseIcon";
  */
 async function fetchConnectionDetails() {
   try {
-    // Hardcoded to localhost:3001; adjust if deployed or using a different port
     const response = await fetch("http://localhost:3000/api/connection-details");
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
@@ -50,7 +49,6 @@ function App() {
    */
   const onConnectButtonClicked = useCallback(async () => {
     try {
-      // If you want to call the function directly:
       const data = await fetchConnectionDetails();
       updateConnectionDetails(data);
     } catch (err) {
