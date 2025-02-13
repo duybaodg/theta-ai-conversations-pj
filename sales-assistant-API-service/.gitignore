@@ -1,2 +1,5 @@
 /sales-assistant-API-service/SalesAssistantAPI/bin/
 /sales-assistant-API-service/SalesAssistantAPI/obj/
+*.AssemblyInfo.cs
+*.cache
+
