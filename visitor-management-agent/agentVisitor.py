@@ -259,9 +259,6 @@ def run_multimodal_agent(ctx: JobContext, participant: rtc.RemoteParticipant):
             "6. **If there are multiple incorrect attempts, suggest contacting the receptionist for assistance.** "
         ),
         modalities=["audio", "text"],
-        turn_detection=openai.realtime.ServerVadOptions(
-            threshold=0.95, prefix_padding_ms=200, silence_duration_ms=500
-        ),
     )
     agent = MultimodalAgent(model=model, fnc_ctx=fnc_ctx)
     agent.start(ctx.room, participant)
