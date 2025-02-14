@@ -19,8 +19,8 @@ public class SalesAssistantController : ControllerBase
     public SalesAssistantController()
     {
         _httpClient = new HttpClient();
-        _apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "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";
-        _assistantId = "asst_Sf96owAWcAFqaAkdVKt377Fi";  
+        _apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "<See-report-file>";
+        _assistantId = "<See-report-file>";  
     }
 
     [HttpGet("ask")]
