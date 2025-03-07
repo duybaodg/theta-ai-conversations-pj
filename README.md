@@ -4,12 +4,12 @@ Welcome to the our project! This innovative application leverages the power of A
 
 ## Overview
 
-This project demonstrates the integration of LiveKit for real-time communication, OpenAI for natural language processing, and a modern React/Next.js frontend to create an engaging AI-powered dental assistant.
+This project demonstrates the integration of LiveKit for real-time communication, OpenAI for natural language processing, and a modern React/Next.js frontend to create an engaging AI-powered sales assistant.
 
 ## Features
 
 - Real-time video and audio communication
-- AI-powered chat assistance for dental queries
+- AI-powered chat assistance for sales queries
 - Modern, responsive user interface
 - Dynamic background animations
 - Seamless integration with LiveKit and OpenAI APIs
